@@ -113,6 +113,10 @@ static const TransitionMapping transition_mappings[] = {
     {TRANSITION_SLIDE_RIGHT, "slide-right", "slide_right"},
     {TRANSITION_GLITCH,      "glitch",      NULL},
     {TRANSITION_PIXELATE,    "pixelate",    NULL},
+    {TRANSITION_ZOOM,        "zoom",        NULL},
+    {TRANSITION_SIDE_WIPE,   "side_wipe",   "side-wipe"},
+    {TRANSITION_CIRCLE,      "circle",      NULL},
+    {TRANSITION_RADIAL,      "radial",      NULL},
 };
 
 static const size_t transition_mapping_count = sizeof(transition_mappings) / sizeof(transition_mappings[0]);

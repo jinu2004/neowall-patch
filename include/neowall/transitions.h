@@ -45,4 +45,11 @@ bool transition_slide_right_render(struct output_state *output, float progress);
 bool transition_glitch_render(struct output_state *output, float progress);
 bool transition_pixelate_render(struct output_state *output, float progress);
 
+bool shader_create_smooth_transition_program(GLuint *program);
+
+bool transition_zoom_render(struct output_state *output, float progress);
+bool transition_side_wipe_render(struct output_state *output, float progress);
+bool transition_circle_render(struct output_state *output, float progress);
+bool transition_radial_render(struct output_state *output, float progress);
+
 #endif /* TRANSITIONS_H */

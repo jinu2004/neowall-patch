@@ -239,6 +239,7 @@ transition_sources = files(
   'src/transitions/glitch.c',
   'src/transitions/pixelate.c',
   'src/transitions/slide.c',
+  'src/transitions/smooth.c',
   'src/transitions/transitions.c',
 )
 

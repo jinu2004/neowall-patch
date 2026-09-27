@@ -654,7 +654,7 @@ static void print_version(void) {
     printf("  - Live GPU shaders at 60 FPS (Shadertoy compatible)\n");
     printf("  - 2%% CPU usage (lighter than video wallpapers)\n");
     printf("  - Multi-monitor support\n");
-    printf("  - Smooth transitions (fade, slide, glitch, pixelate)\n");
+    printf("  - Smooth transitions (fade, slide, glitch, pixelate, zoom, side_wipe, circle, radial)\n");
     printf("  - Works on Hyprland, Sway, River, and other Wayland compositors\n");
     printf("\nSupported image formats:\n");
     printf("  - PNG\n");

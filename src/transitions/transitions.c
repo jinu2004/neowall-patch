@@ -36,6 +36,10 @@ static const struct transition transitions[] = {
     { TRANSITION_SLIDE_RIGHT, "slide_right", transition_slide_right_render },
     { TRANSITION_GLITCH,      "glitch",      transition_glitch_render },
     { TRANSITION_PIXELATE,    "pixelate",    transition_pixelate_render },
+    { TRANSITION_ZOOM,        "zoom",        transition_zoom_render },
+    { TRANSITION_SIDE_WIPE,   "side_wipe",   transition_side_wipe_render },
+    { TRANSITION_CIRCLE,      "circle",      transition_circle_render },
+    { TRANSITION_RADIAL,      "radial",      transition_radial_render },
 };
 
 static const size_t transition_count = sizeof(transitions) / sizeof(transitions[0]);

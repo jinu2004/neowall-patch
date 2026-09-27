@@ -378,6 +378,16 @@ bool render_init_output(struct output_state *output) {
         return false;
     }
 
+    /* Create shared smooth transition shader program */
+    if (!shader_create_smooth_transition_program(&output->smooth_transition_program)) {
+        log_error("Failed to create smooth transition shader program for output %s",
+                  output->model);
+        shader_destroy_program(output->program);
+        shader_destroy_program(output->glitch_program);
+        shader_destroy_program(output->pixelate_program);
+        return false;
+    }
+
     /* Create VAO - required for OpenGL 3.3 Core Profile */
     glGenVertexArrays(1, &output->vao);
     glBindVertexArray(output->vao);
@@ -471,6 +481,11 @@ void render_cleanup_output(struct output_state *output) {
     if (output->pixelate_program != 0) {
         shader_destroy_program(output->pixelate_program);
         output->pixelate_program = 0;
+    }
+
+    if (output->smooth_transition_program != 0) {
+        shader_destroy_program(output->smooth_transition_program);
+        output->smooth_transition_program = 0;
     }
 
     /* Clean up multipass shader */

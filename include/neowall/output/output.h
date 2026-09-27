@@ -40,6 +40,10 @@ enum transition_type {
     TRANSITION_SLIDE_RIGHT,
     TRANSITION_GLITCH,
     TRANSITION_PIXELATE,
+    TRANSITION_ZOOM,
+    TRANSITION_SIDE_WIPE,
+    TRANSITION_CIRCLE,
+    TRANSITION_RADIAL,
 };
 
 /* Wallpaper type */
@@ -232,6 +236,7 @@ struct output_state {
     GLuint program;
     GLuint glitch_program;              /* Shader program for glitch transition */
     GLuint pixelate_program;            /* Shader program for pixelate transition */
+    GLuint smooth_transition_program;   /* Shared zoom/wipe/circle/radial shader */
     GLuint live_shader_program;         /* Shader program for live wallpaper (legacy, kept for compatibility) */
     multipass_shader_t *multipass_shader; /* Multipass shader for live wallpaper (new) */
     GLuint vao;                         /* Vertex array object (required for OpenGL 3.3 Core) */
