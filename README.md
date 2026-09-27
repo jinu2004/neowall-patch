@@ -1,267 +1,596 @@
-<p align="center">
-  <img src="packaging/neowall.svg" alt="NeoWall" width="280"/>
-</p>
+# NeoWall Patch — Smooth Image Transitions
 
-<p align="center">
-  <strong>Run GLSL shaders as your Linux wallpaper.</strong>
-</p>
+A patched version of **NeoWall v0.7.2** with additional GPU-based image transition effects.
 
-<p align="center">
-  <a href="https://github.com/1ay1/neowall/actions/workflows/build.yml"><img src="https://github.com/1ay1/neowall/actions/workflows/build.yml/badge.svg" alt="Build"/></a>
-  <a href="https://github.com/1ay1/neowall/blob/main/LICENSE"><img src="https://img.shields.io/github/license/1ay1/neowall?color=blue" alt="License"/></a>
-  <a href="https://github.com/1ay1/neowall/releases"><img src="https://img.shields.io/github/v/release/1ay1/neowall?include_prereleases&color=purple" alt="Release"/></a>
-</p>
+This project keeps NeoWall's existing wallpaper engine and adds four additional image transitions:
 
-<p align="center">
-  <video src="https://github.com/user-attachments/assets/3a55d4e2-7257-4884-8aa2-9024ec86a560" width="49%" controls autoplay loop muted></video>
-  <video src="https://github.com/user-attachments/assets/c1e38d88-5c1e-4db4-9948-da2ad86c6a69" width="49%" controls autoplay loop muted></video>
-</p>
+* `zoom`
+* `side_wipe`
+* `circle`
+* `radial`
+
+The original transitions remain available:
+
+* `fade`
+* `slide_left`
+* `slide_right`
+* `glitch`
+* `pixelate`
+
+`none` can be used for an instant wallpaper change.
+
+## Features
+
+* GPU-accelerated wallpaper rendering
+* Image wallpaper support
+* Smooth image-to-image transitions
+* 9 transition effects
+* Random transition selection is easy to integrate into scripts
+* No need to restart NeoWall between wallpaper changes
+* `duration 0` can be used to disable automatic wallpaper cycling
+* Works with X11 and Wayland environments supported by NeoWall
+* Compatible with software rendering through Mesa LLVMpipe when hardware OpenGL is insufficient
+
+## Added Transitions
+
+### Zoom
+
+A smooth zoom-out/zoom-in transition between the old and new wallpaper.
+
+```text
+transition zoom
+```
+
+### Side Wipe
+
+The new wallpaper is revealed horizontally.
+
+```text
+transition side_wipe
+```
+
+### Circle
+
+The new wallpaper expands outward from the center of the screen.
+
+```text
+transition circle
+```
+
+### Radial
+
+The new wallpaper is revealed using a radial/angular sweep.
+
+```text
+transition radial
+```
+
+## Requirements
+
+### General
+
+* Linux
+* X11 or Wayland
+* OpenGL 3.3 capable renderer
+* Meson
+* Ninja
+* GCC/Clang and standard build tools
+* PNG/JPEG development libraries
+
+NeoWall's upstream build system uses Meson and Ninja.
 
 ---
 
-Paste a [Shadertoy](https://www.shadertoy.com/) shader into a file, point neowall at it, get an animated desktop. Wayland + X11, multi-monitor, single static binary, no daemon-in-Python anywhere.
+# Installation
+
+## Arch Linux
+
+Install the required build dependencies:
+
+```bash
+sudo pacman -S base-devel meson ninja wayland mesa libpng libjpeg-turbo \
+    wayland-protocols libx11 libxrandr libxkbcommon
+```
+
+These are based on the upstream NeoWall Arch build requirements.
+
+Clone this repository:
+
+```bash
+git clone https://github.com/jinu2004/neowall-patch.git
+cd neowall-patch
+```
+
+Build:
+
+```bash
+meson setup build --buildtype=release
+meson compile -C build
+```
+
+Install:
+
+```bash
+sudo install -Dm755 build/neowall /usr/bin/neowall
+```
+
+Verify:
+
+```bash
+neowall --version
+```
+
+## Installing the Custom Tag
+
+The patched source can be checked out using:
+
+```bash
+git checkout v0.7.2-jinu-smooth
+```
+
+Then build:
+
+```bash
+meson setup build --buildtype=release
+meson compile -C build
+```
+
+Install:
+
+```bash
+sudo install -Dm755 build/neowall /usr/bin/neowall
+```
+
+---
+
+# Software Rendering
+
+NeoWall requires a desktop OpenGL 3.3 context.
+
+Some older Intel GPUs expose only OpenGL 2.1 through their hardware driver. In that situation, Mesa's LLVMpipe software renderer can provide the required OpenGL version.
+
+Run NeoWall with:
+
+```bash
+LIBGL_ALWAYS_SOFTWARE=1 \
+GALLIUM_DRIVER=llvmpipe \
+neowall -f -v
+```
+
+With a configuration file:
+
+```bash
+LIBGL_ALWAYS_SOFTWARE=1 \
+GALLIUM_DRIVER=llvmpipe \
+neowall -f -v -c ~/.config/neowall/config.vibe
+```
+
+Look for output indicating that LLVMpipe is being used and that an OpenGL 3.3+ context was created.
+
+## Example
+
+```text
+OpenGL renderer: llvmpipe
+OpenGL version: 4.6
+```
+
+Software rendering is slower than hardware rendering, but it allows NeoWall to run on older hardware that cannot provide the required OpenGL version directly.
+
+---
+
+# Configuration
+
+NeoWall uses:
+
+```text
+~/.config/neowall/config.vibe
+```
+
+A basic image configuration:
+
+```text
+default {
+    path /home/user/Pictures/Wallpapers/
+    mode fill
+    duration 0
+    shuffle false
+    transition fade
+    transition_duration 0.90
+}
+```
+
+## Disable Automatic Wallpaper Cycling
+
+Set:
+
+```text
+duration 0
+```
+
+This prevents NeoWall from automatically changing wallpapers.
+
+This is useful when another program, such as an i3 theme switcher, controls wallpaper changes.
+
+## Transition Duration
+
+For example:
+
+```text
+transition_duration 0.90
+```
+
+Longer values produce slower transitions.
+
+Examples:
+
+```text
+transition_duration 0.30
+transition_duration 0.60
+transition_duration 0.90
+transition_duration 1.20
+```
+
+---
+
+# Available Transitions
+
+| Transition  | Configuration            |
+| ----------- | ------------------------ |
+| Fade        | `transition fade`        |
+| Slide left  | `transition slide_left`  |
+| Slide right | `transition slide_right` |
+| Glitch      | `transition glitch`      |
+| Pixelate    | `transition pixelate`    |
+| Zoom        | `transition zoom`        |
+| Side wipe   | `transition side_wipe`   |
+| Circle      | `transition circle`      |
+| Radial      | `transition radial`      |
+| None        | `transition none`        |
+
+The first five are from the original NeoWall transition system. The last four are added by this patch.
+
+---
+
+# NeoWall Commands
+
+Start NeoWall:
 
 ```bash
 neowall
 ```
 
-It pauses itself the moment a window covers the wallpaper, so it isn't burning your battery while you actually use the computer.
-
-## Install
+Stop NeoWall:
 
 ```bash
-# Arch (AUR)
-yay -S neowall-bin      # prebuilt, tracks each release
-yay -S neowall-git      # builds from git
-
-# Prebuilt binary
-# https://github.com/1ay1/neowall/releases/latest
-tar -xzf neowall-linux-x86_64-*.tar.gz
-sudo install -m755 neowall /usr/local/bin/
-
-# From source
-git clone https://github.com/1ay1/neowall && cd neowall
-meson setup build && ninja -C build
-sudo ninja -C build install
+neowall kill
 ```
 
-<details>
-<summary>Build dependencies</summary>
+Reload configuration:
 
 ```bash
-# Debian/Ubuntu
-sudo apt install build-essential meson ninja-build libwayland-dev \
-    libgles2-mesa-dev libpng-dev libjpeg-dev wayland-protocols \
-    libx11-dev libxrandr-dev libxkbcommon-dev
-
-# Arch
-sudo pacman -S base-devel meson ninja wayland mesa libpng libjpeg-turbo \
-    wayland-protocols libx11 libxrandr libxkbcommon
-
-# Fedora
-sudo dnf install gcc meson ninja-build wayland-devel mesa-libGLES-devel \
-    libpng-devel libjpeg-turbo-devel wayland-protocols-devel \
-    libX11-devel libXrandr-devel libxkbcommon-devel
+neowall reload
 ```
 
-`libxkbcommon` is optional at build time, but without it the terminal
-wallpaper compiles fine and then silently has no keyboard input — install it.
-</details>
-
-## Config
-
-`~/.config/neowall/config.vibe`
-
-```
-default {
-  shader retro_wave.glsl
-  shader_speed 0.8
-}
-```
-
-Image slideshow:
-
-```
-default {
-  path ~/Pictures/Wallpapers/
-  duration 300
-  transition glitch
-}
-```
-
-Per-output:
-
-```
-output {
-  DP-1     { shader matrix_rain.glsl }
-  HDMI-A-1 { path ~/Pictures/ duration 600 }
-}
-```
-
-Full reference: [`config/docs/CONFIG.md`](config/docs/CONFIG.md).
-
-## Commands
+Change to the next wallpaper:
 
 ```bash
-neowall          # start
-neowall kill     # stop
-neowall reload   # reload config
-neowall next     # next wallpaper / shader
-neowall pause    # pause cycling
+neowall next
+```
+
+List wallpapers:
+
+```bash
+neowall list
+```
+
+Set a wallpaper by index:
+
+```bash
+neowall set 0
+```
+
+Show the current wallpaper:
+
+```bash
+neowall current
+```
+
+Pause wallpaper cycling:
+
+```bash
+neowall pause
+```
+
+Resume wallpaper cycling:
+
+```bash
 neowall resume
-neowall pause-shader   # freeze the shader animation in place
-neowall resume-shader  # resume a frozen shader animation
-neowall list     # show queue
-neowall set 3    # jump to index
-neowall current  # print what's playing
 ```
-
-## Shaders
-
-30+ in the box. Bring your own — neowall accepts unmodified [Shadertoy](https://www.shadertoy.com/) GLSL: drop a `.glsl` file into `~/.config/neowall/shaders/` and reference it from your config.
-
-| Vibe | A few |
-|------|-------|
-| Synthwave | `retro_wave` · `synthwave` · `neonwave_sunrise` |
-| Nature | `moon_ocean` · `living_aurora` · `sunrise` |
-| Cyber | `matrix_rain` · `matrix_real` · `glowing_triangles` |
-| Abstract | `fractal_land` · `plasma_touch` · `mandelbrot` |
-| Space | `star_next` · `starship_reentry` |
-
-Pair it with [**GLEditor**](https://github.com/1ay1/gleditor) for a live-preview shader workflow that one-clicks into neowall.
-
-### Reactive shaders — a living desktop
-
-neowall is a **superset of Shadertoy**: on top of full compatibility it feeds
-shaders *live data from your machine* and ships a GLSL std-lib (noise, SDFs,
-palettes, tonemap) injected automatically — no `#include`. Shaders can react to
-system audio (FFT), CPU/RAM/network load, battery, the real time of day, and
-your mouse/keyboard. See [`docs/REACTIVE_SHADERS.md`](docs/REACTIVE_SHADERS.md).
-
-| Shader | Reacts to |
-|--------|-----------|
-| `audio_pulse` · `audio_bars` | system audio — spectrum, bass, beats |
-| `mouse_ripples` | water ripples from your cursor (click = splash) |
-| `plasma_touch` | plasma you push around with the mouse |
-| `fireflies` | a swarm that gathers at your pointer, flares on beat |
-| `starfield_warp` | warp speed scales with mouse motion + audio |
-| `system_monitor` | CPU heat, RAM tide, network pulses, battery |
-| `system_deck` | a command-deck HUD: CPU/RAM gauges, scrolling history graph, per-core meters, net traces, battery, clock |
-| `rain_window` | rain on glass — heavier with network, lightning on beat |
-| `circadian_sky` | a sky synced to your real clock: dawn → noon → dusk → stars |
-
-Drop a `.neowall` sidecar next to any shader for explicit channel bindings and
-custom reactive uniforms (e.g. `uniform uGlow audio_bass`). Audio capture uses
-`parec` (PipeWire/PulseAudio) and degrades to silence if it's not installed. It
-records your **speaker output** (the default sink's monitor), never the
-microphone, and only starts when the loaded shader actually reads audio.
-
-**Changing what feeds `iChannel0..3`** (audio, noise, self-feedback, another
-buffer, a texture, a bitmap font atlas): a bare `.glsl` guesses via a heuristic;
-a `.neowall` sidecar lets you bind each channel explicitly — `channel0 audio`,
-`channel1 self`, `channel2 font`, etc.
-See [`docs/REACTIVE_SHADERS.md`](docs/REACTIVE_SHADERS.md#3-neowall-manifests).
-
-## Terminal as wallpaper
-
-Any terminal program can *be* the wallpaper. neowall ships its own in-tree,
-dependency-free VT/xterm-class terminal emulator (real PTY, spec-correct
-ANSI/DEC parser, cell grid with SGR truecolour, scroll regions, the alternate
-screen, mouse reporting and colour emoji) and renders its cell grid on the GPU —
-so `btop`, `htop`, `cava`, `vim` or a scrolling `journalctl -f` run live behind
-your windows.
-
-```
-default {
-  terminal btop
-  term_cols 0     # 0 = auto-fit the whole display
-  term_rows 0
-}
-```
-
-```
-default {
-  terminal "journalctl -f"
-  term_font_size 16
-  term_shader crt.glsl    # optional: pipe the terminal through a CRT/glow pass
-}
-```
-
-It's a *real* terminal, not a screenshot: it answers the startup handshake
-(cursor-position report, Device Attributes) so probing TUIs enter their render
-loop and animate, forwards the pointer when the app enables mouse reporting, and
-auto-restarts the command if it exits. No libvterm, no external terminal — every
-byte of the parser and screen model is in-tree, in the same spirit as neowall's
-hand-rolled event loop and config parser.
-
-Full key reference (`term_font`, `term_font_size`, `term_fg`/`term_bg`,
-`term_cwd`, `term_env`, `term_shader`, …) is in
-[`config/docs/CONFIG.md`](config/docs/CONFIG.md#terminal-options).
-
-## How it works
-
-Single C binary. The event loop is built on `timerfd` + `signalfd` — there is no polling thread anywhere. Rendering goes through EGL → OpenGL 3.3 (desktop) with a GLES 2.0 fallback for older GPUs.
-
-```
-config.vibe → event loop ─┬─→ EGL / OpenGL 3.3
-                          ├─→ Wayland (layer-shell)
-                          └─→ X11 (root window + EWMH)
-```
-
-Smart pause is the main thing that separates neowall from the obvious one-evening hack:
-
-- Wayland: `wl_surface.frame` watchdog + `wlr-foreign-toplevel` state bits, plus a Hyprland-specific IPC path that handles the awkward "tiled mosaic of small windows covers the wallpaper" case
-- X11: EWMH `_NET_WM_STATE_FULLSCREEN` on every output
-
-Result: while a fullscreen game, a maximized browser, or a wall of tiled terminals is covering the screen, neowall draws zero frames. The moment you switch workspaces, it picks back up.
-
-## Compared to
-
-| | neowall | swww | mpvpaper | hyprpaper |
-|-|---------|------|----------|-----------|
-| Animated GLSL shaders | ✓ | – | – | – |
-| Drop-in Shadertoy support | ✓ | – | – | – |
-| Terminal / TUI as wallpaper | ✓ | – | – | – |
-| Image slideshow | ✓ | ✓ | – | ✓ |
-| Video | – | gifs only | ✓ | – |
-| Wayland | ✓ | ✓ | ✓ | ✓ |
-| X11 | ✓ | – | – | – |
-| Pauses when occluded | ✓ | – | – | – |
-
-If you want video wallpapers, use mpvpaper — neowall is deliberately not that.
-
-## Caveats, honestly
-
-- **KDE Plasma**: native desktop icons may hide while neowall owns the background layer. Use a dock or `plasma-desktop`'s widgets.
-- **GNOME/Mutter and other compositors without layer-shell**: unsupported. Wayland does not allow a client to map a visible wallpaper from a bare `wl_surface`; neowall exits with an actionable error instead of silently selecting a non-visible fallback.
-- **No video**: by design.
-
-## Hacking
-
-```bash
-meson setup build --buildtype=debug
-ninja -C build
-./build/neowall -f -v
-```
-
-Architecture, threading model, and contribution conventions are documented in
-[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). Run the test suite (headless,
-no display server needed) with `meson test -C build`; for the memory-safety and
-concurrency gates use a sanitized build:
-
-```bash
-meson setup build-asan -Db_sanitize=address,undefined && meson test -C build-asan
-meson setup build-tsan -Db_sanitize=thread && meson test -C build-tsan output_refcount
-```
-
-Shaders, bug reports, and compositor coverage PRs are all welcome. Issue tracker is the place.
-
-## License
-
-MIT.
 
 ---
 
-<p align="center">
-  <a href="https://github.com/1ay1/neowall/issues">Issues</a> · <a href="https://github.com/1ay1/neowall/discussions">Discussions</a> · <a href="https://github.com/1ay1/neowall">★ if it's your thing</a>
-</p>
+# Random Transitions
+
+The transition can be randomized from a shell script.
+
+Example:
+
+```bash
+transitions=(
+    fade
+    slide_left
+    slide_right
+    glitch
+    pixelate
+    zoom
+    side_wipe
+    circle
+    radial
+)
+
+transition="${transitions[RANDOM % ${#transitions[@]}]}"
+```
+
+Then use the selected transition in the NeoWall configuration before changing the wallpaper.
+
+This allows a theme switcher to randomly choose both:
+
+1. the wallpaper
+2. the transition effect
+
+---
+
+# i3 Theme Switcher
+
+This patch works particularly well with an i3 theme-switching workflow.
+
+A wallpaper helper can:
+
+1. Find wallpapers belonging to the selected theme.
+2. Select a random wallpaper.
+3. Select a random transition.
+4. Update the NeoWall configuration.
+5. Reload NeoWall.
+6. Set the selected wallpaper.
+
+Example transition pool:
+
+```bash
+transitions=(
+    fade
+    slide_left
+    slide_right
+    glitch
+    pixelate
+    zoom
+    side_wipe
+    circle
+    radial
+)
+```
+
+The important part is that NeoWall does **not** need to be restarted for every wallpaper change.
+
+---
+
+# Persistent Wallpaper Queue
+
+For a theme switcher using a persistent queue, wallpapers can be maintained in a directory such as:
+
+```text
+~/.cache/neowall/theme-queue/
+```
+
+The queue can contain the wallpapers from all themes.
+
+For example:
+
+```text
+catppuccin-mocha--wallpaperflare.jpg
+everforest--mountains.jpg
+gruvbox-dark--wallpaper.jpg
+nord--firewatch.jpg
+tokyo-night--wallpaper.png
+```
+
+NeoWall can then address them by their zero-based queue index:
+
+```bash
+neowall list
+```
+
+Example:
+
+```text
+[0] catppuccin-mocha--wallpaperflare.jpg
+[1] everforest--mountains.jpg
+[2] gruvbox-dark--wallpaper.jpg
+```
+
+Then:
+
+```bash
+neowall set 1
+```
+
+---
+
+# Building From Source
+
+Clean build:
+
+```bash
+rm -rf build
+meson setup build --buildtype=release
+meson compile -C build
+```
+
+The resulting executable is:
+
+```text
+build/neowall
+```
+
+Test it without installing:
+
+```bash
+LIBGL_ALWAYS_SOFTWARE=1 \
+GALLIUM_DRIVER=llvmpipe \
+./build/neowall -f -v -c ~/.config/neowall/config.vibe
+```
+
+If the test succeeds, install:
+
+```bash
+sudo install -Dm755 build/neowall /usr/bin/neowall
+```
+
+---
+
+# Development
+
+Check the working tree:
+
+```bash
+git status
+```
+
+Build:
+
+```bash
+meson compile -C build
+```
+
+Check the latest commits:
+
+```bash
+git log --oneline -5
+```
+
+The custom transition implementation is located at:
+
+```text
+src/transitions/smooth.c
+```
+
+The additional transition types are registered in:
+
+```text
+src/transitions/transitions.c
+src/config/config.c
+```
+
+The shared smooth-transition shader program is initialized and cleaned up in:
+
+```text
+src/render/render.c
+```
+
+The transition enum is defined in:
+
+```text
+include/neowall/output/output.h
+```
+
+The source file is included in:
+
+```text
+meson.build
+```
+
+---
+
+# Git Version
+
+This repository is based on:
+
+```text
+NeoWall v0.7.2
+```
+
+Custom patch tag:
+
+```text
+v0.7.2-jinu-smooth
+```
+
+The upstream version number is retained because this is a patch based on NeoWall v0.7.2 rather than an independently versioned NeoWall release.
+
+---
+
+# Troubleshooting
+
+## OpenGL 3.3 Context Error
+
+If you see:
+
+```text
+Failed to create OpenGL 3.3 context
+```
+
+try:
+
+```bash
+LIBGL_ALWAYS_SOFTWARE=1 \
+GALLIUM_DRIVER=llvmpipe \
+neowall -f -v
+```
+
+## NeoWall Does Not Change Wallpaper
+
+Check the queue:
+
+```bash
+neowall list
+```
+
+Then manually test:
+
+```bash
+neowall set 0
+```
+
+Check the current wallpaper:
+
+```bash
+neowall current
+```
+
+## Test a Specific Transition
+
+Edit:
+
+```bash
+nano ~/.config/neowall/config.vibe
+```
+
+Set, for example:
+
+```text
+transition circle
+```
+
+Then reload and advance:
+
+```bash
+neowall reload
+neowall next
+```
+
+---
+
+# Credits
+
+This repository is a modification of NeoWall.
+
+Original project:
+
+https://github.com/1ay1/neowall
+
+Original author and project maintainers retain their respective rights under the original project's license.
+
+See the upstream repository for the original documentation, architecture, shader system, and project information.
+
+# License
+
+See the `LICENSE` file included in this repository.
